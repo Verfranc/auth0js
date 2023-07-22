@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>X App</title>
+</head>
+<body>
+  <script src="https://cdn.auth0.com/js/auth0-spa-js/2.1/auth0-spa-js.production.js"></script>
+  <script src="common.js"></script>
+  <script>
+    window.onload = async () => {
+      await configureAuth0Client();
+
+      const query = window.location.search;
+      const shouldParseResult = query.includes("code=") && query.includes("state=");
+
+      if (shouldParseResult) {
+        await auth0Client.handleRedirectCallback();
+
+        const options = {
+          authorizationParams: {
+            audience: AUTH0_AUDIENCE
+          }
+        };
+        const token = await auth0Client.getTokenSilently(options);
+        const user = await auth0Client.getUser();
+
+        sessionStorage.setItem(AUTH0_ACCESS_TOKEN_KEY, token);
+        sessionStorage.setItem(AUTH0_AUTHENTICATED_KEY, 'true');
+        sessionStorage.setItem(AUTH0_USER_KEY, JSON.stringify(user));
+        localStorage.setItem(AUTH0_HAD_AUTH_KEY, 'true');
+      }
+
+      window.location.href = '/';
+    };
+  </script>
+</body>
+</html>
